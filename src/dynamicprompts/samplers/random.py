@@ -68,6 +68,22 @@ class RandomSampler(Sampler):
         if len(command.values) == 0:
             return
         elif len(command.values) == 1:
+            val = command.values[0]
+            if getattr(val, "name", None) in getattr(context, "variables", {}):
+                resolved = context.variables[val.name]
+                if isinstance(resolved, VariantCommand):
+                    yield from self._get_variant(
+                        VariantCommand(
+                            resolved.values,
+                            weights=resolved.weights,
+                            min_bound=command.min_bound,
+                            max_bound=command.max_bound,
+                            separator=command.separator,
+                        ),
+                        context,
+                    )
+                    return
+
             if isinstance(command.values[0], WildcardCommand):
                 wildcard_variant = wildcard_to_variant(
                     command.values[0],
