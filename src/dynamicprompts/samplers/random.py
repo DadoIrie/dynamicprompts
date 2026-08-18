@@ -78,6 +78,7 @@ class RandomSampler(Sampler):
                             min_bound=command.min_bound,
                             max_bound=command.max_bound,
                             separator=command.separator,
+                            sampling_method=resolved.sampling_method,
                         ),
                         context,
                     )
