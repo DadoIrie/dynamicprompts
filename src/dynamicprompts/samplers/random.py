@@ -75,7 +75,6 @@ class RandomSampler(Sampler):
                     yield from self._get_variant(
                         VariantCommand(
                             resolved.values,
-                            weights=resolved.weights,
                             min_bound=command.min_bound,
                             max_bound=command.max_bound,
                             separator=command.separator,
