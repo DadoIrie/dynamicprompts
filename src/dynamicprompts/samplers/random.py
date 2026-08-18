@@ -74,7 +74,7 @@ class RandomSampler(Sampler):
                 if isinstance(resolved, VariantCommand):
                     yield from self._get_variant(
                         VariantCommand(
-                            resolved.values,
+                            resolved.variants,
                             min_bound=command.min_bound,
                             max_bound=command.max_bound,
                             separator=command.separator,
