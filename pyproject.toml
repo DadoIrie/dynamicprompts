@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Text Processing"
 ]
 dependencies = [
@@ -37,7 +38,7 @@ feelinglucky = ["requests<3"]
 yaml = ["pyyaml<7"]
 dev = [
     "pytest-cov~=4.0",
-    "pytest-lazy-fixture~=0.6",
+    "pytest-lazy-fixtures~=1.1",
     "pytest~=7.2",
 ]
 
@@ -46,6 +47,8 @@ path = "src/dynamicprompts/__init__.py"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+testpaths = ["tests"]
+norecursedirs = ["scratch", ".venv", "dist", "build"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]

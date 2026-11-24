@@ -2,13 +2,10 @@ name: Test
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - "v*"
+    branches: ["main"]
   pull_request:
-    branches:
-      - main
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -36,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.8"] # minimum supported version
+        python-version: ["3.8", "3.12"] # minimum and current supported versions
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}

@@ -1,9 +1,109 @@
-# Dynamic Prompts
+# dynamicprompts-plus
+
+[![Test](https://github.com/yamashita-yukihito/dynamicprompts-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/yamashita-yukihito/dynamicprompts-plus/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/github/license/yamashita-yukihito/dynamicprompts-plus)](LICENSE)
+
+A fork of [adieyal/dynamicprompts](https://github.com/adieyal/dynamicprompts) that adds **conditional prompt evaluation** via the `%if{}` command — enabling runtime branching based on variable values directly in your prompt templates.
+
+> A small but actively maintained fork focused on **controllable, reproducible prompt-generation workflows** for Stable Diffusion / reForge.
+
+## Why this fork exists
+
+dynamicprompts-plus exists to support more controllable and reproducible prompt-generation workflows for Stable Diffusion / reForge users.
+
+The original Dynamic Prompts ecosystem is excellent for random prompt variation, but some local image-generation workflows need conditional branching, reusable prompt logic, and more predictable behavior. This fork adds experimental syntax such as `%if{}` to make complex prompt templates easier to manage, debug, and reproduce — without giving up compatibility with the upstream templating language.
+
+## What's new in this fork
+
+### `%if{}` — Conditional evaluation
+
+The `%if{op$$arg1($$arg2)$$then($$else)}` syntax lets you branch on variable values at generation time.
+
+**Syntax:**
+
+```
+%if{operator$$argument1($$argument2)$$output_if_true($$output_if_false)}
+```
+
+**Supported operators:**
+
+| Operator  | Description         | Example                                |
+| --------- | ------------------- | -------------------------------------- |
+| `eq`      | Equals              | `%if{eq$$${hat}$$big hat$$blue$$red}`  |
+| `neq`     | Not equals          | `%if{neq$$${hat}$$big hat$$blue$$red}` |
+| `defined` | Variable is defined | `%if{defined$$hat$$wearing a hat}`     |
+| `truthy`  | Truthiness check    | `%if{truthy$$true$$Yes$$No}`           |
+
+**Examples:**
+
+```
+# Conditional color based on hat size
+${hat=!small hat}%if{eq$$${hat}$$big hat$$blue$$red}
+# → "red" (because hat = "small hat", not "big hat")
+
+# Optional clause (no else branch)
+%if{defined$$hat$$wearing a hat}
+# → "wearing a hat" if $hat is defined, otherwise empty string
+
+# Boolean check
+%if{truthy$$true$$Yes$$No}
+# → "Yes"
+```
+
+**Combining with variable assignment:**
+
+```
+${season=!winter}%if{eq$$${season}$$winter$$a snowy landscape$$a sunny meadow}
+# → "a snowy landscape"
+```
+
+## Installation
+
+### As a drop-in for sd-dynamic-prompts (A1111 / ReForge / WebUI)
+
+To use this fork's features in your WebUI extension, replace the dependency in `extensions/sd-dynamic-prompts/pyproject.toml`:
+
+```toml
+[project]
+dependencies = [
+    "send2trash~=1.8",
+    "dynamicprompts[attentiongrabber,magicprompt] @ git+https://github.com/yamashita-yukihito/dynamicprompts-plus.git@main",
+]
+```
+
+Then restart your WebUI. It will automatically install this fork instead of the official package.
+
+### As a Python library
+
+```bash
+pip install git+https://github.com/yamashita-yukihito/dynamicprompts-plus.git
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
+
+## Maintenance status
+
+This repository is actively maintained as part of my own local AI image-generation workflow.
+
+Although this fork is currently small and niche, I use it directly in Stable Diffusion / reForge prompt workflows and plan to keep improving it with parser tests, clearer documentation, compatibility notes, and examples for conditional prompt syntax. It is not a large project and makes no claim to a wide user base — it is a focused fork driven by real, day-to-day prompt-engineering needs.
+
+## Roadmap
+
+- Keep `%if{}` parser and sampler behavior covered by tests
+- Document edge cases for nested prompt templates
+- Improve examples for Stable Diffusion WebUI / reForge users
+- Add compatibility notes for adjacent ComfyUI / reForge workflows
+- Keep the fork aligned with upstream [`adieyal/dynamicprompts`](https://github.com/adieyal/dynamicprompts) where practical
+
+---
+
+## Original dynamicprompts documentation
+
+> The sections below are inherited from the upstream Dynamic Prompts documentation and are kept here for compatibility and reference. The fork-specific additions (the `%if{}` command and the notes above) are documented in the earlier sections of this README. The PyPI badges below refer to the upstream package, not to this fork.
 
 ![MIT](https://img.shields.io/github/license/adieyal/dynamicprompts)
-&nbsp;-&nbsp;
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/adieyal/dynamicprompts/test.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/adieyal/dynamicprompts)](https://app.codecov.io/gh/adieyal/dynamicprompts)
 &nbsp;-&nbsp;
 [![PyPI](https://img.shields.io/pypi/v/dynamicprompts)](https://pypi.org/project/dynamicprompts) ![PyPI - Downloads](https://img.shields.io/pypi/dm/dynamicprompts)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dynamicprompts)
@@ -23,6 +123,7 @@ It includes:
 - Provides an I'm Feeling Lucky feature which uses the semantic search on Lexica.art to find similar prompts.
 - For systems that support attention syntax, Attention Grabber will emphasis random phrases in your prompt.
 - Jinja-powered templating for advanced prompt creation.
+- **[New in this fork]** `%if{}` conditional command for runtime branching.
 
 The dynamic prompts library powers the [Dynamic Prompts](https://github.com/adieyal/sd-dynamic-prompts) extension for Automatic1111.
 
@@ -387,7 +488,7 @@ lucky_generator = FeelingLuckyGenerator(generator)
 num_prompts = 5
 lucky_generator.generate("I love {red|green|blue} roses", num_prompts)
 
->> ['“ guns and roses ” ', '🌹🥀🏜. 🌌🌠⭐. 💯. ', 'tattoo design, stencil, beautiful japanese girls face, roses and ivy surrounding by artgerm, artgerm, cat girl, anime ', 'rose made of glass dramatic lighting', 'a wireframe render of a red rose']
+>> ['" guns and roses " ', '🌹🥀🏜. 🌌🌠⭐. 💯. ', 'tattoo design, stencil, beautiful japanese girls face, roses and ivy surrounding by artgerm, artgerm, cat girl, anime ', 'rose made of glass dramatic lighting', 'a wireframe render of a red rose']
 
 ```
 
@@ -421,7 +522,7 @@ When Spacy is available, an NLP model will automatically be downloaded on first 
 
 ## Jinja2 templates
 
-If the standard template language is not sufficient for your needs, you can try the Jinja2 generator. Jinja2 templates have familiar programming constructs such as looping, conditionals, variables, etc. Youcan find a guide on using Jinja2 templates with Dynamic Prompts, [here](https://github.com/adieyal/sd-dynamic-prompts/blob/main/jinja2.md). Here is the minimal code you need to instantiate Jinja2 generator.
+If the standard template language is not sufficient for your needs, you can try the Jinja2 generator. Jinja2 templates have familiar programming constructs such as looping, conditionals, variables, etc. You can find a guide on using Jinja2 templates with Dynamic Prompts, [here](https://github.com/adieyal/sd-dynamic-prompts/blob/main/jinja2.md). Here is the minimal code you need to instantiate Jinja2 generator.
 
 ```python
 from dynamicprompts.generators import JinjaGenerator
