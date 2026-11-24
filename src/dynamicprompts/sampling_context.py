@@ -127,8 +127,6 @@ class SamplingContext:
         if self.ignore_whitespace:
             gen = (res.whitespace_squashed() for res in gen)
 
-        gen = (res.text_replaced(res.text.replace("\\n", "\n")) for res in gen)
-
         if num_prompts is None:
             return gen
         return islice(gen, num_prompts)
